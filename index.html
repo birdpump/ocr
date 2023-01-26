@@ -1,0 +1,66 @@
+<html>
+
+<head>
+    <script src='https://unpkg.com/tesseract.js@4.0.1/dist/tesseract.min.js'></script>
+    <link href="main.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+    <div class="main">
+        <div class="doc">
+            <label class="custom-file-upload">
+                <input type="file" id="uploader" accept="image/*"
+                    onchange="document.getElementById('prev').src = window.URL.createObjectURL(this.files[0])" />
+                Open File
+            </label>
+
+            <img id="prev">
+        </div>
+        <div class="res">
+            <progress id="health" value="0" max="100"></progress>
+            <textarea id="output" name="story"></textarea>
+        </div>
+    </div>
+
+    <script>
+        const recognize = async ({ target: { files } }) => {
+            sload()
+            const { data: { text } } = await Tesseract.recognize(files[0], 'eng', {
+                corePath: 'https://unpkg.com/tesseract.js-core@v4.0.1/tesseract-core.wasm.js',
+                workerPath: "https://unpkg.com/tesseract.js@v4.0.1/dist/worker.min.js",
+                logger: m => console.log(m),
+            });
+            loadstop()
+            document.getElementById('output').value = text;
+        }
+        const elm = document.getElementById('uploader');
+        elm.addEventListener('change', recognize);
+    </script>
+    <script>
+        let intervalID
+        function loadstop() {
+            clearInterval(intervalID)
+            document.getElementById("health").value = 0;
+        }
+        function sload() {
+            intervalID = setInterval(load, 50);
+            let end;
+            function load() {
+                let dragonHealth = document.getElementById("health").value;
+                if (end == true) {
+                    document.getElementById("health").value += 3;
+                } else {
+                    document.getElementById("health").value -= 3;
+                }
+                if (dragonHealth >= 100) {
+                    end = false;
+                } else if (dragonHealth <= 0) {
+                    end = true;
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
