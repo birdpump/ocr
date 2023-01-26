@@ -1,0 +1,113 @@
+<html>
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@upscalerjs/default-model@latest/dist/umd/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/upscaler@latest/dist/browser/umd/upscaler.min.js"></script>
+    <title>Upload Example | Upscaler.JS</title>
+    <style>
+        body {
+            padding: 40px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        button {
+            margin-top: 20px;
+            display: block;
+            padding: 10px 40px;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        table td {
+            vertical-align: top;
+            border: 1px solid #eee;
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Upload Example</h1>
+    <h1 id="prog">test</h1>
+    <button onclick="test()">test </button>
+    <p>
+        An example of uploading an image for upscaling with
+        <a target="_blank" href="https://github.com/thekevinscott/UpscalerJS">UpscalerJS</a>.
+    </p>
+    <p>Upload a file below to upscale it.</p>
+    <input type="file" id="file" />
+    <p id="info"></p>
+    <table style="display: none;" id="table">
+        <thead>
+            <tr>
+                <td>Original</td>
+                <td>Upscaled</td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <div id="original"></div>
+                </td>
+                <td>
+                    <div id="target"></div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <script>
+        function test(){
+            let datas = upscaler.upscale(progress) 
+            alert(data);       
+        }
+        const table = document.getElementById("table");
+        const original = document.getElementById("original");
+        const target = document.getElementById("target");
+        const file = document.getElementById("file");
+        const info = document.getElementById("info");
+
+        const createImage = (targetDiv, src) => {
+            const img = document.createElement("img");
+            img.src = src;
+            targetDiv.innerHTML = "";
+            targetDiv.appendChild(img);
+            return img;
+        };
+
+        const upscaler = new Upscaler({
+            model: DefaultUpscalerJSModel,
+            warmupSizes: [[64, 64]],
+        });
+        async function handleFiles() {
+            info.innerText = "Upscaling...";
+            target.innerHTML = "";
+            table.style = "";
+            await tf.nextFrame();
+            const file = this.files[0];
+            const fr = new FileReader();
+            fr.onload = async () => {
+                const img = createImage(original, fr.result);
+                const start = new Date().getTime();
+                const upscaledImgSrc = await upscaler.upscale(img, {
+                    patchSize: 64,
+                    padding: 5,
+                    progress: (percent) => {
+                        document.getElementById("prog").innerText = percent * 100;
+                    },
+                });
+                createImage(target, upscaledImgSrc);
+                const ms = new Date().getTime() - start;
+                info.innerText = `Upscaled in ${ms} ms`;
+            };
+            fr.readAsDataURL(file);
+        }
+
+        file.addEventListener("change", handleFiles, false);
+
+    </script>
+</body>
+
+</html>
